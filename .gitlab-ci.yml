@@ -1,0 +1,39 @@
+stages:
+  - integration-testing
+
+variables:
+  SLACK_HOOK: ''
+  ALLURE_REPORT_GROUP: FMCG
+  REPORT_PORTAL_URL: ''
+  REPORT_PROJECT_NAME: FMCG-Browserstack
+  CLUSTER_NAME: stg
+  SLACK_CHANNEL: ''
+  SLACK_SUCCESS_EMOJI: ":tits:"
+  SLACK_FAILURE_EMOJI: ":technological:"
+  SLACK_COLLECT_ERROR_EMOJI: ":shitstorm:"
+
+
+
+integration_testing:
+
+  stage: integration-testing
+
+  image:
+    name: ''
+    entrypoint: [""]
+  before_script:
+    # Download the browserstack binary file
+    - wget "https://www.browserstack.com/browserstack-local/BrowserStackLocal-linux-x64.zip
+    # Unzip the BrowserStack Local binary file
+    - unzip BrowserStackLocal-linux-x64.zip
+    # Run the file with your access key
+    - ./BrowserStackLocal --key '' --daemon start
+
+  script:
+    - export EXIT_CODE=0
+    - ls -la
+    - pip install qa_report --extra-index-url http://'' --trusted-host ''
+    - pip install -r requirements.txt -U
+    - pytest -s -n=5 --dist=loadfile tests/ --alluredir allure_result -vv || EXIT_CODE=$? && true ;
+    - report --exit-code $EXIT_CODE --slug-name $CI_PROJECT_PATH_SLUG-$CI_COMMIT_REF_SLUG --push-metrics true
+    - exit $EXIT_CODE
